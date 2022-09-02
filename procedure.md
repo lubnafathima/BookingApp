@@ -438,5 +438,32 @@ export const register = async (req, res, next) => {
 }
   ```
   53. To add cookies in our website in terminal enter the following command: `npm i jsonwebtoken`  
-  54.
-  55.
+  54. update `controller>auth.js`
+  ```
+import jwt from "jsonwebtoken";
+  export const login = async (req, res, next) => {
+    try {
+        const user = await User.findOne({username:req.body.username})
+        if(!user) return next(createError(404, "User not found!"));
+        
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+        if(!isPasswordCorrect) return next(createError(400, "Wrong Password or Username!"));
+        
+        const token = jwt.sign({id:user._id, isAdmin: user.isAdmin}, "secretKey")
+
+        const { password, isAdmin, ...otherDetails } = user._doc;
+        res.status(200).json({...otherDetails});
+    } catch (err) {
+        next(err)
+    }
+}
+  ```
+  55. run the following command in terminal to generate secret key `openssl rand -base64 32` and copy the secrey key from it   
+  . if openssl is not recognize in your pc refer this: https://medium.com/swlh/installing-openssl-on-windows-10-and-updating-path-80992e26f6a1  
+  . through this install Win64 OpenSSL v1.1.1q MSI in https://slproweb.com/products/Win32OpenSSL.html  
+  . then in environment variable set the path (C:\Program Files\OpenSSL-Win64\bin)  
+  56.
+  57.
+  58.
+  59.
+  60.
