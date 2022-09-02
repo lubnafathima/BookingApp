@@ -303,4 +303,9 @@ app.use((err, req, res, next) => {
     return err;
 }
   ```
-  43. MongoDB Authentication(Login / Register)
+  43. before that let's create a seperate files for our operations such as crud  
+  44. Create a folder inside server called as `controller`
+  45. Inside `controller` folder create files such as `hotel.js`, `room.js`, `user,js` and `auth.js`  
+  46. 
+  MongoDB Authentication(Login / Register)  
+  
