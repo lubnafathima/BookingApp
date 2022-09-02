@@ -558,9 +558,98 @@ router.get("/", getUsers);
 export default router;
   ```
   64. To allow update user:  
-  65.  
-  66.  
-  67.   
-  68.  
-  69.  
+  In utils create a file called as `verifyToken.js` and paste the following:  
+```
+import jwt from "jsonwebtoken";
+import {createError} from "../utils/error.js";
+
+export const verifyToken = (req, res, next) => {
+    const token = req.cookies.access_token;
+    if(!token) {
+        return next(createError(401, "You are not authenticated!"));
+    }
+
+    jwt.verify(token, process.env.JWT, (err, user) => {
+        if(err) return next(createError(403, "Token is not valid!"));
+        req.user = user;
+        next();
+    });
+};
+
+export const verifyUser = (req, res, next) => {
+    verifyToken(req, res, next, () => {
+        if (req.user.id === req.params.id || req.user.isAdmin) {
+            next();
+        } else {
+            return next(createError(403, "You are not authorized!"));
+        }
+    })
+}
+  ```
+  65.  followed by that add the following in `routes>users.js`   
+  ```
+  import express from "express";
+import { createUser, deleteUser, getUser, getUsers, updateUser } from "../controllers/user.js";
+import { verifyToken, verifyUser } from "../utils/verifyToken.js";
+
+const router =  express.Router();
+
+router.get("/checkauthentication", verifyToken, (req, res, next) => {
+    res.send("hello user, you are logger in");
+});
+
+router.get("/checkuser/:id", verifyUser, (req, res, next) => {
+    res.send("hello user, you are logger in and you can delete your account");
+});
+
+  ```
+  66. Lets do the same for admin in `verifyToken.js`
+  ```
+  
+export const verifyAdmin = (req, res, next) => {
+    verifyToken(req, res, next, () => {
+        if (req.user.isAdmin) {
+            next();
+        } else {
+            return next(createError(403, "You are not authorized!"));
+        }
+    })
+}
+  ```
+  67.  Update Admin in `routes>users.js`
+  ```
+  import { verifyAdmin, verifyToken, verifyUser, verifyAdmin } from "../utils/verifyToken.js";
+  
+  router.get("/checkadmin/:id", verifyAdmin, (req, res, next) => {
+      res.send("hello admin, you are logger in and you can delete all accounts");
+  });
+  ```
+  68.  Updated `routes>users.js`
+  ```
+  import express from "express";
+import { createUser, deleteUser, getUser, getUsers, updateUser } from "../controllers/user.js";
+import { verifyAdmin, verifyToken, verifyUser } from "../utils/verifyToken.js";
+
+const router =  express.Router();
+
+// UPDATE
+router.put("/:id", verifyUser, updateUser);
+
+// DELETE
+router.delete("/:id", verifyUser, deleteUser);
+
+// GET
+router.get("/:id", verifyUser, getUser);
+
+// GET ALL
+router.get("/", verifyAdmin, getUsers);
+
+export default router;
+  ```
+  69.Node MongoDB Model Relations  
   70.  
+  71.  
+  72.  
+  73.  
+  74.  
+  75.  
