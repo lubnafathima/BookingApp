@@ -476,14 +476,91 @@ import jwt from "jsonwebtoken";
 //middlewares
 app.use(cookieParser());
   ```
-  60.
-  61.
-  62.
-  63.
-  64.
-  65.
-  66.
-  67.
-  68.
-  69.
-  70.
+  60. `controller>auth.js`  
+  instead of res.status update this
+  ```
+  res.cookie("access_token", token, {
+            httpOnly: true,
+        }).status(200).json({...otherDetails});
+  ```
+  61.Node.js JWT Role-Based Authorization Verification  
+  . if its admin, then they will be able to delete the hotel
+  62. just like `controller>hotel.js` paste the following in `controller>user.js`
+  ```
+  import User from "../models/Hotel.js";
+
+export const createUser = async (req, res, next) => {
+    const newUser = new User(req.body);
+    try {
+        const savedUser = await newUser.save();
+        res.status(200).json(savedUser);
+    } catch(err) {
+        next(err);
+    }    
+}
+export const updateUser = async (req, res, next) => {
+    try {
+        const updateUser = await User.findByIdAndUpdate(req.params.id, { $set: req.body }, { new : true});
+        res.status(200).json(updateUser);
+    } catch(err) {
+        res.status(500).json(err);
+    }   
+}
+export const deleteUser = async (req, res, next) => {
+    try {
+        await User.findByIdAndDelete(req.params.id);
+        res.status(200).json("User has been deleted");
+    } catch(err) {
+        res.status(500).json(err);
+    }
+}
+export const getUser = async (req, res, next) => {
+    try {
+        const user = await user.findById(req.params.id);
+        res.status(200).json(User);
+    } catch(err) {
+        res.status(500).json(err);
+    }   
+}
+export const getUsers = async (req, res, next) => {
+    try {
+        const users = await User.find();
+        res.status(200).json(users);
+    } catch(err) {
+        res.status(500).json(err);
+    }    
+}
+  ```
+  63. just like `routes>hotel.js` paste the following in `routes>user.js`  
+  ```
+  import express from "express";
+import { createUser, deleteUser, getUser, getUsers, updateUser } from "../controllers/user.js";
+import Hotel from "../models/Hotel.js";
+
+const router =  express.Router();
+
+// Node.js MongoDB CRUD Operations
+// CREATE
+router.post("/", createUser);
+
+// UPDATE
+router.put("/:id", updateUser);
+
+// DELETE
+router.delete("/:id", deleteUser);
+
+// GET
+router.get("/:id", getUser);
+
+// GET ALL
+router.get("/", getUsers);
+
+export default router;
+  ```
+  64. To allow update user:  
+  65.  
+  66.  
+  67.   
+  68.  
+  69.  
+  70.  
