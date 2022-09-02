@@ -274,7 +274,8 @@ router.get("/", async (req, res) => {
 });
 
 export default router;
-  ```
+  ```  
+  try sending a request in `insomia/postman`  
   40. Express Middleware  
   Middleware are important because it's able to reach to request and response before sending anything to user  
   . You can write a middleware (say, index.js) and pass it to any page (eg:hotels.js)  
@@ -302,10 +303,140 @@ app.use((err, req, res, next) => {
     err.message = message;
     return err;
 }
-  ```
+  ```  
+    
+ ##    MongoDB Authentication(Login / Register)
   43. before that let's create a seperate files for our operations such as crud  
   44. Create a folder inside server called as `controller`
-  45. Inside `controller` folder create files such as `hotel.js`, `room.js`, `user,js` and `auth.js`  
-  46. 
-  MongoDB Authentication(Login / Register)  
+  45. Inside `controller` folder create files such as `hotel.js`, `room.js`, `user.js` and `auth.js`  
+  46. paste the following in controllers>hotel.js
+  ```
+  import express from "express";
+import { createHotel, deleteHotel, getHotel, getHotels, updateHotel } from "../controllers/hotel.js";
+import Hotel from "../models/Hotel.js";
+
+const router =  express.Router();
+
+// Node.js MongoDB CRUD Operations
+// CREATE
+router.post("/", createHotel);
+
+// UPDATE
+router.put("/:id", updateHotel);
+
+// DELETE
+router.delete("/:id", deleteHotel);
+
+// GET
+router.get("/:id", getHotel);
+
+// GET ALL
+router.get("/", getHotels);
+
+export default router;
+  ```
   
+47. Now we dont have to do the crud operation directly as we pasted it in `controller>hotel.js` so lets update `routes>hotels.js`
+  ```
+  import express from "express";
+import { createHotel, deleteHotel, getHotel, getHotels, updateHotel } from "../controllers/hotel.js";
+import Hotel from "../models/Hotel.js";
+
+const router =  express.Router();
+
+// Node.js MongoDB CRUD Operations
+// CREATE
+router.post("/", createHotel);
+
+// UPDATE
+router.put("/:id", updateHotel);
+
+// DELETE
+router.delete("/:id", deleteHotel);
+
+// GET
+router.get("/:id", getHotel);
+
+// GET ALL
+router.get("/", getHotels);
+
+export default router;
+  ```
+  48. `controller>auth.js`
+  ```
+  import User from "../models/User.js"
+
+export const register = async (req, res, next) => {
+    try {
+        const newUser = new User({
+            username:req.body.username,
+            email:req.body.email,
+            password:req.body.password,
+        })
+        await newUser.save()
+        res.status(200).send("User has been created.");
+    } catch (err) {
+        next(err)
+    }
+}
+  ```
+  49. `route>auth.js`
+  ```
+  import express from "express"; //importing express
+import { register } from "../controllers/auth.js";
+
+const router =  express.Router();
+
+// api request
+router.post("/register", register);
+
+export default router; //exporting router
+  ```  
+   If your using `postman/insomnia` try getting a post request and see if this works
+  50. Now to make our users password more secure lets use a npm package.  
+  . open new terminal and run the following command in server
+  > npm i bcryptjs
+  51. Update it in `controller>auth.js`
+  ```
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
+
+export const register = async (req, res, next) => {
+    try {
+        const salt = bcrypt.genSaltSync(10);
+        const hash = bcrypt.hashSync(req.body.password, salt);
+
+        const newUser = new User({
+            username:req.body.username,
+            email:req.body.email,
+            password:hash,
+        })
+        await newUser.save()
+        res.status(200).send("User has been created.");
+    } catch (err) {
+        next(err)
+    }
+}
+  ```
+  52. Now let's add login and make sure the encrypted password matches with what user login  
+  `controller>auth.js`
+```
+  export const login = async (req, res, next) => {
+    try {
+        const user = await User.findOne({username:req.body.username})
+        if(!user) return next(createError(404, "User not found!"));
+        
+        const isPasswordCorrect = await bcrypt.compare(req.body.password, user.password);
+        if(!isPasswordCorrect) return next(createError(400, "Wrong Password or Username!"));
+        
+        const { password, isAdmin, ...otherDetails } = user._doc;
+        
+        res.status(200).json({...otherDetails});
+    } catch (err) {
+        next(err)
+    }
+}
+  ```
+  53. To add cookies in our website in terminal enter the following command: `npm i jsonwebtoken`  
+  54.
+  55.
