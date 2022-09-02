@@ -462,8 +462,28 @@ import jwt from "jsonwebtoken";
   . if openssl is not recognize in your pc refer this: https://medium.com/swlh/installing-openssl-on-windows-10-and-updating-path-80992e26f6a1  
   . through this install Win64 OpenSSL v1.1.1q MSI in https://slproweb.com/products/Win32OpenSSL.html  
   . then in environment variable set the path (C:\Program Files\OpenSSL-Win64\bin)  
-  56.
-  57.
-  58.
-  59.
+  56. Not paste the secret key from terminal to `.env` file
+  ```
+  JWT = <secret key comes here>
+  ```
+  57.going back to `controller>auth.js`
+  in place of `secretKey` in const token paste the following: `process.env.JWT`  
+  58. Now to add our token to cookies, in terminal install `npm i cookie-parser`  
+  59.In `index.js`, type the following
+  ```
+  import cookieParser from "cookie-parser";
+
+//middlewares
+app.use(cookieParser());
+  ```
   60.
+  61.
+  62.
+  63.
+  64.
+  65.
+  66.
+  67.
+  68.
+  69.
+  70.
