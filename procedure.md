@@ -766,5 +766,81 @@ router.get("/", getRooms);
 export default router;
   ```
   73.Installing React App    
-  74.   
-  75.  
+  74. In terminal, `cd..` and come out of server folder and run: `npx create-react-app client`  
+  NOTE: client is the frontend react-app name
+  75. Create a frontend and run: `npm start` inside `client` folder in terminal
+  76.  After creating a frontend , to show the **COUNT OF DOCUMENT**  
+  77.  Say we need our url to be `https://localhost:8000/hotes/cities?=london,paris`  
+. here what does cities represent?  
+  . in our database we get the details of particular hotels that are situated in the cities like london and paris  
+  . london and paris are in array, Hence we get multiple datas
+  78.   open `controller>hotel.js`  
+  ```
+  export const countByCity = async (req, res, next) => {
+    const cities = req.query.cities.split(",")
+    try {
+        const list = await Promise.all(cities.map(city=>{
+            return Hotel.countDocuments({city:city}) //countDocuments is mongodb property, this way it will be faster to fetch
+        }));
+        res.status(200).json(list);
+    } catch(err) {
+        res.status(500).json(err);
+    }    
+}
+  ```
+  79.  `routes.hotel.js`
+  ```
+  // DELETE
+router.delete("/find/:id", verifyAdmin, deleteHotel);
+
+// GET ALL
+router.get("/", getHotels);
+router.get("/countByCity", countByCity);
+  ```   
+  now since find/:id is given it will try to fetch only id
+  80.  Now we will fetch data using custom hook  
+  . create a folder inside `client>src` -> `client>src>hooks`  
+. inside hooks create a file called as `useFetch.js`
+  81. in new client type: `npm i axios`;   
+  82. `useFetch.js`   
+  ```
+  import { useEffect, useState } from "react";
+
+
+const useFetch = (url) => {
+    const [data, setData] = useState([])
+    const [loding, setLoding] = useState(false)
+    const [error, setError] = useState(false)
+
+    useEffect(() => {
+        const fetchData = async() => {
+            setLoading(true);
+            try{
+                const res = axios.get(url);
+                setData(res.data);
+            } catch(err) {
+                setError(err);
+            }
+            setLoading(false);
+        };
+        fetchData();
+    }, [url]);
+
+    const reFetch = async() => {
+        setLoading(true);
+        try{
+            const res = axios.get(url);
+            setData(res.data);
+        } catch(err) {
+            setError(err);
+        }
+        setLoading(false);
+    };
+    return { data, loading, error, reFetch };
+};
+
+export default useFetch;
+  ```  
+  83.   
+  84.    
+  85.    
