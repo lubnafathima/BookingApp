@@ -842,5 +842,4 @@ const useFetch = (url) => {
 export default useFetch;
   ```  
   83. `src>featured>featured.jsx`  
-  84.    
-  85.    
+   
